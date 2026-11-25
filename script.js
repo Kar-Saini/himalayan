@@ -33,6 +33,8 @@
 
   const languageOptions = [
     // Indian languages
+    { code: "en", flag: "🇬🇧", name: "English" },
+
     { code: "hi", flag: "🇮🇳", name: "हिन्दी" },
     { code: "mr", flag: "🇮🇳", name: "मराठी" },
     { code: "bn", flag: "🇮🇳", name: "বাংলা" },
