@@ -1,3 +1,4 @@
+
 (() => {
   "use strict";
 
@@ -9,7 +10,7 @@
   // =====================================================
 
   $$("[data-year]").forEach(
-    (el) => (el.textContent = new Date().getFullYear()),
+    (el) => (el.textContent = new Date().getFullYear())
   );
 
   // =====================================================
@@ -28,7 +29,7 @@
   }
 
   // =====================================================
-  // GOOGLE TRANSLATE
+  // LANGUAGE CONFIGURATION
   // =====================================================
 
   const languageOptions = [
@@ -39,12 +40,130 @@
     { code: "fr", flag: "🇫🇷", name: "Français" },
     { code: "es", flag: "🇪🇸", name: "Español" },
     { code: "bn", flag: "🇧🇩", name: "বাংলা" },
-    { code: "pt", flag: "🇧🇷", name: "Português" },
+    { code: "pt", flag: "🇧🇷', name: "Português" },
     { code: "de", flag: "🇩🇪", name: "Deutsch" },
     { code: "zh-CN", flag: "🇨🇳", name: "中文" },
     { code: "tr", flag: "🇹🇷", name: "Türkçe" },
-    { code: "id", flag: "🇮🇩", name: "Bahasa Indonesia" },
+    { code: "id", flag: "🇮🇩", name: "Bahasa Indonesia" }
   ];
+
+  const savedLanguage = localStorage.getItem("ht-language") || "en";
+
+  // =====================================================
+  // LANGUAGE DIRECTION (ARABIC RTL)
+  // =====================================================
+
+  function applyLanguageDirection(code) {
+    const isRTL = code === "ar";
+
+    document.documentElement.lang = code;
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+
+    let rtlStyle = $("#translation-direction-styles");
+
+    if (!rtlStyle) {
+      rtlStyle = document.createElement("style");
+      rtlStyle.id = "translation-direction-styles";
+      document.head.appendChild(rtlStyle);
+    }
+
+    rtlStyle.textContent = `
+      html[dir="rtl"] body {
+        direction: rtl;
+        text-align: right;
+      }
+
+      html[dir="rtl"] .nav-wrap,
+      html[dir="rtl"] .nav,
+      html[dir="rtl"] .hero-actions,
+      html[dir="rtl"] .hero-trust,
+      html[dir="rtl"] .cta-inner,
+      html[dir="rtl"] .form-heading,
+      html[dir="rtl"] .consult-points > div {
+        direction: rtl;
+      }
+
+      html[dir="rtl"] .hero-shade {
+        background:
+          linear-gradient(
+            270deg,
+            rgba(5, 28, 47, 0.87) 0%,
+            rgba(6, 35, 51, 0.67) 42%,
+            rgba(5, 29, 44, 0.1) 100%
+          );
+      }
+
+      html[dir="rtl"] .hero-note {
+        right: auto;
+        left: max(22px, calc((100% - 1180px) / 2));
+      }
+
+      html[dir="rtl"] .notice {
+        border-left: 0;
+        border-right: 3px solid var(--gold);
+      }
+
+      html[dir="rtl"] .service-card,
+      html[dir="rtl"] .hospital-body,
+      html[dir="rtl"] .doctor-card,
+      html[dir="rtl"] .field {
+        text-align: right;
+      }
+
+      html[dir="rtl"] .translate-fixed {
+        direction: ltr;
+        text-align: left;
+      }
+
+      html[dir="rtl"] .footer-bottom {
+        direction: rtl;
+      }
+
+      @media (max-width: 760px) {
+        html[dir="rtl"] .hero-note {
+          left: 15px;
+          right: auto;
+        }
+      }
+    `;
+  }
+
+  applyLanguageDirection(savedLanguage);
+
+  // =====================================================
+  // GOOGLE TRANSLATE COOKIE
+  // =====================================================
+
+  function setGoogleTranslateCookie(code) {
+    const cookieValue = `/en/${code}`;
+
+    document.cookie =
+      "googtrans=" +
+      cookieValue +
+      "; path=/; max-age=31536000; SameSite=Lax";
+
+    // Also set the cookie for the current hostname.
+    // This helps on some hosting configurations.
+    const hostname = location.hostname;
+
+    if (
+      hostname &&
+      hostname !== "localhost" &&
+      hostname.includes(".") &&
+      !/^\d+\.\d+\.\d+\.\d+$/.test(hostname)
+    ) {
+      document.cookie =
+        "googtrans=" +
+        cookieValue +
+        "; path=/; domain=" +
+        hostname +
+        "; max-age=31536000; SameSite=Lax";
+    }
+  }
+
+  // =====================================================
+  // CUSTOM LANGUAGE SELECTOR
+  // =====================================================
 
   const translateUI = document.createElement("div");
   translateUI.className = "translate-fixed";
@@ -79,20 +198,16 @@
       <div class="translate-menu-title">Choose language</div>
 
       <div class="translate-options">
-        ${languageOptions
-          .map(
-            (l) => `
+        ${languageOptions.map((language) => `
           <button
             type="button"
             class="translate-option"
-            data-lang="${l.code}"
+            data-lang="${language.code}"
           >
-            <span class="translate-flag">${l.flag}</span>
-            <span>${l.name}</span>
+            <span class="translate-flag">${language.flag}</span>
+            <span>${language.name}</span>
           </button>
-        `,
-          )
-          .join("")}
+        `).join("")}
       </div>
 
       <p class="translate-powered">Powered by Google Translate</p>
@@ -111,165 +226,90 @@
   const translateMenu = $(".translate-menu", translateUI);
   const translateStatus = $(".translate-powered", translateUI);
 
-  const savedLanguage = localStorage.getItem("ht-language") || "en";
-
   function updateLanguageButton(code) {
-    const lang =
-      languageOptions.find((l) => l.code === code) || languageOptions[0];
+    const language =
+      languageOptions.find((item) => item.code === code) ||
+      languageOptions[0];
 
-    $(".translate-selected-flag", translateUI).textContent = lang.flag;
-    $(".translate-selected-name", translateUI).textContent = lang.name;
+    $(".translate-selected-flag", translateUI).textContent =
+      language.flag;
+
+    $(".translate-selected-name", translateUI).textContent =
+      language.name;
 
     translateTrigger.setAttribute(
       "aria-label",
-      "Current language: " + lang.name,
+      "Current language: " + language.name
     );
   }
 
   updateLanguageButton(savedLanguage);
-
-  // Open / close custom language menu
-  translateTrigger.addEventListener("click", () => {
-    const open = translateMenu.hidden;
-
-    translateMenu.hidden = !open;
-
-    translateTrigger.setAttribute("aria-expanded", String(open));
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!translateUI.contains(e.target)) {
-      translateMenu.hidden = true;
-      translateTrigger.setAttribute("aria-expanded", "false");
-    }
-  });
-
-  // Google Translate initialization state
-  let translateInitialized = false;
-  let pendingLanguage = savedLanguage;
 
   function closeLanguageMenu() {
     translateMenu.hidden = true;
     translateTrigger.setAttribute("aria-expanded", "false");
   }
 
-  // Apply a language through Google's generated compact menu.
-  function applyGoogleLanguage(code) {
-    const googleLink = $("#google_translate_element .goog-te-gadget-simple a");
+  translateTrigger.addEventListener("click", () => {
+    const open = translateMenu.hidden;
 
-    if (!googleLink) {
-      translateStatus.textContent =
-        "Google Translate is not ready. Please try again.";
-      return;
+    translateMenu.hidden = !open;
+    translateTrigger.setAttribute("aria-expanded", String(open));
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!translateUI.contains(event.target)) {
+      closeLanguageMenu();
     }
+  });
 
-    if (code === "en") {
-      // Restore original language using Google's page cookie.
-      document.cookie = "googtrans=/en/en; path=/; max-age=31536000";
+  // =====================================================
+  // SELECT LANGUAGE
+  // =====================================================
 
-      const domain = location.hostname;
+  function selectLanguage(code) {
+    const validLanguage = languageOptions.some(
+      (language) => language.code === code
+    );
 
-      if (domain.includes(".")) {
-        const parts = domain.split(".");
-        const rootDomain = "." + parts.slice(-2).join(".");
-
-        document.cookie =
-          "googtrans=/en/en; path=/; domain=" +
-          rootDomain +
-          "; max-age=31536000";
-      }
-
-      location.reload();
-      return;
-    }
-
-    // Open Google's own language selection popup.
-    googleLink.click();
-
-    // Wait for the menu to be generated.
-    let attempts = 0;
-
-    const timer = setInterval(() => {
-      attempts++;
-
-      const options = $$(".goog-te-menu-frame");
-
-      let frame = options[0];
-      let frameDocument = null;
-
-      if (frame) {
-        try {
-          frameDocument = frame.contentDocument || frame.contentWindow.document;
-        } catch (error) {
-          frameDocument = null;
-        }
-      }
-
-      if (frameDocument) {
-        const languageLinks = $$(
-          ".goog-te-menu2-item span.text",
-          frameDocument,
-        );
-
-        const target = languageLinks.find((el) => {
-          const text = el.textContent.trim().toLowerCase();
-
-          const lang = languageOptions.find(
-            (l) => l.code === code && l.name.toLowerCase() === text,
-          );
-
-          return Boolean(lang);
-        });
-
-        if (target) {
-          target.click();
-          clearInterval(timer);
-          closeLanguageMenu();
-          translateStatus.textContent = "Translation selected.";
-          return;
-        }
-      }
-
-      if (attempts >= 15) {
-        clearInterval(timer);
-        translateStatus.textContent =
-          "Google's language menu could not be accessed. Try again or use a supported translation service.";
-      }
-    }, 400);
-  }
-
-  function selectGoogleLanguage(code) {
-    updateLanguageButton(code);
+    if (!validLanguage) return;
 
     localStorage.setItem("ht-language", code);
 
-    pendingLanguage = code;
+    updateLanguageButton(code);
+    applyLanguageDirection(code);
+    closeLanguageMenu();
 
-    if (!translateInitialized) {
-      translateStatus.textContent =
-        "Google Translate is loading. Please try again shortly.";
-      return;
-    }
+    // Google Translate reads this cookie when the page loads.
+    setGoogleTranslateCookie(code);
 
-    translateStatus.textContent = "Connecting to Google Translate...";
+    translateStatus.textContent =
+      code === "en"
+        ? "Switching to English..."
+        : "Translating website...";
 
-    applyGoogleLanguage(code);
+    // Reload to apply the selected language.
+    location.reload();
   }
 
-  $$("[data-lang]", translateUI).forEach((btn) => {
-    btn.addEventListener("click", () => {
-      selectGoogleLanguage(btn.dataset.lang);
+  $$("[data-lang]", translateUI).forEach((button) => {
+    button.addEventListener("click", () => {
+      selectLanguage(button.dataset.lang);
     });
   });
 
-  // Google callback
+  // =====================================================
+  // GOOGLE TRANSLATE INITIALIZATION
+  // =====================================================
+
   window.googleTranslateElementInit = function () {
     if (
       !window.google ||
       !google.translate ||
       !google.translate.TranslateElement
     ) {
-      translateStatus.textContent = "Google Translate could not initialize.";
+      translateStatus.textContent =
+        "Google Translate could not initialize.";
       return;
     }
 
@@ -277,30 +317,25 @@
       new google.translate.TranslateElement(
         {
           pageLanguage: "en",
-          includedLanguages: "en,hi,ar,ru,fr,es,bn,pt,de,zh-CN,tr,id",
+          includedLanguages:
+            "en,hi,ar,ru,fr,es,bn,pt,de,zh-CN,tr,id",
           autoDisplay: false,
-          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          layout:
+            google.translate.TranslateElement.InlineLayout.SIMPLE
         },
-        "google_translate_element",
+        "google_translate_element"
       );
 
-      translateInitialized = true;
-
       translateStatus.textContent = "Powered by Google Translate";
-
-      if (pendingLanguage !== "en") {
-        setTimeout(() => {
-          applyGoogleLanguage(pendingLanguage);
-        }, 1500);
-      }
     } catch (error) {
       console.error("Google Translate initialization error:", error);
 
-      translateStatus.textContent = "Google Translate initialization failed.";
+      translateStatus.textContent =
+        "Google Translate initialization failed.";
     }
   };
 
-  // Load Google script only once
+  // Load Google Translate only once.
   if (!window.googleTranslateScriptLoaded) {
     window.googleTranslateScriptLoaded = true;
 
@@ -329,16 +364,18 @@
     const cards = $$(".searchable");
 
     hospitalSearch.addEventListener("input", () => {
-      const q = hospitalSearch.value.toLowerCase().trim();
+      const query = hospitalSearch.value.toLowerCase().trim();
 
       let count = 0;
 
-      cards.forEach((c) => {
-        const show = ((c.dataset.search || "") + " " + c.textContent)
+      cards.forEach((card) => {
+        const show = (
+          (card.dataset.search || "") + " " + card.textContent
+        )
           .toLowerCase()
-          .includes(q);
+          .includes(query);
 
-        c.hidden = !show;
+        card.hidden = !show;
 
         if (show) count++;
       });
@@ -361,22 +398,26 @@
   if (doctorSearch && doctorHospital) {
     const cards = $$(".searchable-doctor");
 
-    const filter = () => {
-      const q = doctorSearch.value.toLowerCase().trim();
-      const h = doctorHospital.value;
+    const filterDoctors = () => {
+      const query = doctorSearch.value.toLowerCase().trim();
+      const hospitalValue = doctorHospital.value;
 
       let count = 0;
 
-      cards.forEach((c) => {
-        const matchesText = ((c.dataset.search || "") + " " + c.textContent)
+      cards.forEach((card) => {
+        const matchesText = (
+          (card.dataset.search || "") + " " + card.textContent
+        )
           .toLowerCase()
-          .includes(q);
+          .includes(query);
 
-        const matchesHospital = h === "all" || c.dataset.hospital === h;
+        const matchesHospital =
+          hospitalValue === "all" ||
+          card.dataset.hospital === hospitalValue;
 
         const show = matchesText && matchesHospital;
 
-        c.hidden = !show;
+        card.hidden = !show;
 
         if (show) count++;
       });
@@ -388,8 +429,8 @@
       }
     };
 
-    doctorSearch.addEventListener("input", filter);
-    doctorHospital.addEventListener("change", filter);
+    doctorSearch.addEventListener("input", filterDoctors);
+    doctorHospital.addEventListener("change", filterDoctors);
   }
 
   // =====================================================
@@ -402,18 +443,22 @@
 
   if (hospital && hospitalSelect) {
     const match = [...hospitalSelect.options].find(
-      (o) => o.text.toLowerCase() === hospital.toLowerCase(),
+      (option) =>
+        option.text.toLowerCase() === hospital.toLowerCase()
     );
 
     if (match) {
       hospitalSelect.value = match.value;
     } else {
-      const opt = document.createElement("option");
+      const option = document.createElement("option");
 
-      opt.textContent = hospital;
-      opt.value = hospital;
+      option.textContent = hospital;
+      option.value = hospital;
 
-      hospitalSelect.insertBefore(opt, hospitalSelect.options[1]);
+      hospitalSelect.insertBefore(
+        option,
+        hospitalSelect.options[1]
+      );
 
       hospitalSelect.value = hospital;
     }
@@ -426,13 +471,15 @@
   const form = $("#consultForm");
 
   if (form) {
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async (event) => {
       if (
         !form.action ||
-        (form.action.endsWith("backend/contact.php") &&
-          location.protocol === "file:")
+        (
+          form.action.endsWith("backend/contact.php") &&
+          location.protocol === "file:"
+        )
       ) {
-        e.preventDefault();
+        event.preventDefault();
 
         const status = $("#formStatus");
 
@@ -442,7 +489,7 @@
 
           status.scrollIntoView({
             behavior: "smooth",
-            block: "nearest",
+            block: "nearest"
           });
         }
 
@@ -450,7 +497,7 @@
       }
 
       if (form.dataset.ajax === "true") {
-        e.preventDefault();
+        event.preventDefault();
 
         const status = $("#formStatus");
 
@@ -459,30 +506,34 @@
         }
 
         try {
-          const res = await fetch(form.action, {
+          const response = await fetch(form.action, {
             method: "POST",
             body: new FormData(form),
             headers: {
-              Accept: "application/json",
-            },
+              Accept: "application/json"
+            }
           });
 
-          const data = await res.json();
+          const data = await response.json();
 
-          if (!res.ok) {
-            throw new Error(data.message || "Could not send your enquiry.");
+          if (!response.ok) {
+            throw new Error(
+              data.message || "Could not send your enquiry."
+            );
           }
 
           if (status) {
             status.textContent =
-              data.message || "Thank you. Your enquiry has been sent.";
+              data.message ||
+              "Thank you. Your enquiry has been sent.";
           }
 
           form.reset();
-        } catch (err) {
+        } catch (error) {
           if (status) {
             status.textContent =
-              err.message || "Unable to send right now. Please try again.";
+              error.message ||
+              "Unable to send right now. Please try again.";
           }
         }
       }
