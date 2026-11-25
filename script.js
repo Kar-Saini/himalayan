@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -10,7 +9,7 @@
   // =====================================================
 
   $$("[data-year]").forEach(
-    (el) => (el.textContent = new Date().getFullYear())
+    (el) => (el.textContent = new Date().getFullYear()),
   );
 
   // =====================================================
@@ -33,18 +32,31 @@
   // =====================================================
 
   const languageOptions = [
-    { code: "en", flag: "🇬🇧", name: "English" },
+    // Indian languages
     { code: "hi", flag: "🇮🇳", name: "हिन्दी" },
+    { code: "mr", flag: "🇮🇳", name: "मराठी" },
+    { code: "bn", flag: "🇮🇳", name: "বাংলা" },
+    { code: "ta", flag: "🇮🇳", name: "தமிழ்" },
+    { code: "te", flag: "🇮🇳", name: "తెలుగు" },
+    { code: "kn", flag: "🇮🇳", name: "ಕನ್ನಡ" },
+    { code: "ml", flag: "🇮🇳", name: "മലയാളം" },
+    { code: "gu", flag: "🇮🇳", name: "ગુજરાતી" },
+    { code: "pa", flag: "🇮🇳", name: "ਪੰਜਾਬੀ" },
+    { code: "or", flag: "🇮🇳", name: "ଓଡ଼ିଆ" },
+    { code: "as", flag: "🇮🇳", name: "অসমীয়া" },
+    { code: "ne", flag: "🇮🇳", name: "नेपाली" },
+
+    // International languages
+    { code: "en", flag: "🇬🇧", name: "English" },
     { code: "ar", flag: "🇸🇦", name: "العربية" },
     { code: "ru", flag: "🇷🇺", name: "Русский" },
     { code: "fr", flag: "🇫🇷", name: "Français" },
     { code: "es", flag: "🇪🇸", name: "Español" },
-    { code: "bn", flag: "🇧🇩", name: "বাংলা" },
-    { code: "pt", flag: "🇧🇷', name: "Português" },
+    { code: "pt", flag: "🇧🇷", name: "Português" },
     { code: "de", flag: "🇩🇪", name: "Deutsch" },
     { code: "zh-CN", flag: "🇨🇳", name: "中文" },
     { code: "tr", flag: "🇹🇷", name: "Türkçe" },
-    { code: "id", flag: "🇮🇩", name: "Bahasa Indonesia" }
+    { code: "id", flag: "🇮🇩", name: "Bahasa Indonesia" },
   ];
 
   const savedLanguage = localStorage.getItem("ht-language") || "en";
@@ -138,9 +150,7 @@
     const cookieValue = `/en/${code}`;
 
     document.cookie =
-      "googtrans=" +
-      cookieValue +
-      "; path=/; max-age=31536000; SameSite=Lax";
+      "googtrans=" + cookieValue + "; path=/; max-age=31536000; SameSite=Lax";
 
     // Also set the cookie for the current hostname.
     // This helps on some hosting configurations.
@@ -198,7 +208,9 @@
       <div class="translate-menu-title">Choose language</div>
 
       <div class="translate-options">
-        ${languageOptions.map((language) => `
+        ${languageOptions
+          .map(
+            (language) => `
           <button
             type="button"
             class="translate-option"
@@ -207,7 +219,9 @@
             <span class="translate-flag">${language.flag}</span>
             <span>${language.name}</span>
           </button>
-        `).join("")}
+        `,
+          )
+          .join("")}
       </div>
 
       <p class="translate-powered">Powered by Google Translate</p>
@@ -229,17 +243,15 @@
   function updateLanguageButton(code) {
     const language =
       languageOptions.find((item) => item.code === code) ||
-      languageOptions[0];
+      languageOptions.find((item) => item.code === "en");
 
-    $(".translate-selected-flag", translateUI).textContent =
-      language.flag;
+    $(".translate-selected-flag", translateUI).textContent = language.flag;
 
-    $(".translate-selected-name", translateUI).textContent =
-      language.name;
+    $(".translate-selected-name", translateUI).textContent = language.name;
 
     translateTrigger.setAttribute(
       "aria-label",
-      "Current language: " + language.name
+      "Current language: " + language.name,
     );
   }
 
@@ -269,7 +281,7 @@
 
   function selectLanguage(code) {
     const validLanguage = languageOptions.some(
-      (language) => language.code === code
+      (language) => language.code === code,
     );
 
     if (!validLanguage) return;
@@ -284,9 +296,7 @@
     setGoogleTranslateCookie(code);
 
     translateStatus.textContent =
-      code === "en"
-        ? "Switching to English..."
-        : "Translating website...";
+      code === "en" ? "Switching to English..." : "Translating website...";
 
     // Reload to apply the selected language.
     location.reload();
@@ -308,8 +318,7 @@
       !google.translate ||
       !google.translate.TranslateElement
     ) {
-      translateStatus.textContent =
-        "Google Translate could not initialize.";
+      translateStatus.textContent = "Google Translate could not initialize.";
       return;
     }
 
@@ -318,20 +327,18 @@
         {
           pageLanguage: "en",
           includedLanguages:
-            "en,hi,ar,ru,fr,es,bn,pt,de,zh-CN,tr,id",
+            "en,hi,mr,bn,ta,te,kn,ml,gu,pa,or,as,ne,ar,ru,fr,es,pt,de,zh-CN,tr,id",
           autoDisplay: false,
-          layout:
-            google.translate.TranslateElement.InlineLayout.SIMPLE
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
         },
-        "google_translate_element"
+        "google_translate_element",
       );
 
       translateStatus.textContent = "Powered by Google Translate";
     } catch (error) {
       console.error("Google Translate initialization error:", error);
 
-      translateStatus.textContent =
-        "Google Translate initialization failed.";
+      translateStatus.textContent = "Google Translate initialization failed.";
     }
   };
 
@@ -369,9 +376,7 @@
       let count = 0;
 
       cards.forEach((card) => {
-        const show = (
-          (card.dataset.search || "") + " " + card.textContent
-        )
+        const show = ((card.dataset.search || "") + " " + card.textContent)
           .toLowerCase()
           .includes(query);
 
@@ -406,14 +411,15 @@
 
       cards.forEach((card) => {
         const matchesText = (
-          (card.dataset.search || "") + " " + card.textContent
+          (card.dataset.search || "") +
+          " " +
+          card.textContent
         )
           .toLowerCase()
           .includes(query);
 
         const matchesHospital =
-          hospitalValue === "all" ||
-          card.dataset.hospital === hospitalValue;
+          hospitalValue === "all" || card.dataset.hospital === hospitalValue;
 
         const show = matchesText && matchesHospital;
 
@@ -443,8 +449,7 @@
 
   if (hospital && hospitalSelect) {
     const match = [...hospitalSelect.options].find(
-      (option) =>
-        option.text.toLowerCase() === hospital.toLowerCase()
+      (option) => option.text.toLowerCase() === hospital.toLowerCase(),
     );
 
     if (match) {
@@ -455,10 +460,7 @@
       option.textContent = hospital;
       option.value = hospital;
 
-      hospitalSelect.insertBefore(
-        option,
-        hospitalSelect.options[1]
-      );
+      hospitalSelect.insertBefore(option, hospitalSelect.options[1]);
 
       hospitalSelect.value = hospital;
     }
@@ -474,10 +476,8 @@
     form.addEventListener("submit", async (event) => {
       if (
         !form.action ||
-        (
-          form.action.endsWith("backend/contact.php") &&
-          location.protocol === "file:"
-        )
+        (form.action.endsWith("backend/contact.php") &&
+          location.protocol === "file:")
       ) {
         event.preventDefault();
 
@@ -489,7 +489,7 @@
 
           status.scrollIntoView({
             behavior: "smooth",
-            block: "nearest"
+            block: "nearest",
           });
         }
 
@@ -510,30 +510,26 @@
             method: "POST",
             body: new FormData(form),
             headers: {
-              Accept: "application/json"
-            }
+              Accept: "application/json",
+            },
           });
 
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(
-              data.message || "Could not send your enquiry."
-            );
+            throw new Error(data.message || "Could not send your enquiry.");
           }
 
           if (status) {
             status.textContent =
-              data.message ||
-              "Thank you. Your enquiry has been sent.";
+              data.message || "Thank you. Your enquiry has been sent.";
           }
 
           form.reset();
         } catch (error) {
           if (status) {
             status.textContent =
-              error.message ||
-              "Unable to send right now. Please try again.";
+              error.message || "Unable to send right now. Please try again.";
           }
         }
       }

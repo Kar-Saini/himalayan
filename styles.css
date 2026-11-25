@@ -1567,3 +1567,320 @@ html[dir="rtl"] {
 html[dir="rtl"] body {
   text-align: right;
 }
+/* =====================================================
+   CUSTOM LANGUAGE SELECTOR
+   ===================================================== */
+
+/* Header placement */
+.nav-wrap {
+  position: relative;
+}
+
+.translate-fixed {
+  position: relative;
+  z-index: 9999;
+  order: 3;
+  flex: none;
+  margin-left: 0;
+  font-family: "DM Sans", Arial, sans-serif;
+  color: var(--blue);
+}
+
+/* Selector button */
+.translate-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.translate-trigger:hover,
+.translate-trigger:focus-visible {
+  background: #f3f8fb;
+  border-color: #e1edf2;
+  outline: none;
+}
+
+/* Google Translate icon */
+.google-translate-mark {
+  width: 23px;
+  height: 23px;
+  flex: none;
+}
+
+/* Selected language */
+.translate-selected-flag {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.translate-selected-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--blue);
+}
+
+/* Dropdown arrow */
+.translate-chevron {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  margin-left: 1px;
+  color: var(--blue);
+}
+
+/* Dropdown menu */
+.translate-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  bottom: auto;
+  z-index: 10001;
+  width: 260px;
+  max-height: min(440px, 65vh);
+  overflow-y: auto;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #dce6ea;
+  border-radius: 12px;
+  box-shadow: 0 18px 48px #102f4430;
+}
+
+.translate-menu[hidden] {
+  display: none !important;
+}
+
+.translate-menu-title {
+  padding: 5px 8px 11px;
+  color: #16364c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* Language options */
+.translate-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+
+.translate-option {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  color: #284354;
+  text-align: left;
+  font-family: "DM Sans", Arial, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.translate-option:hover,
+.translate-option:focus-visible {
+  background: #edf6f7;
+  outline: none;
+}
+
+.translate-flag {
+  width: 24px;
+  flex: none;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Powered by Google */
+.translate-powered {
+  border-top: 1px solid #e8eef0;
+  margin: 8px 0 0;
+  padding: 10px 8px 2px;
+  color: #82929c;
+  font-size: 10px;
+}
+
+/* Keep Google Translate initialized but off-screen */
+.google-translate-hidden {
+  position: fixed !important;
+  left: -10000px !important;
+  top: 0 !important;
+  width: 260px !important;
+  height: 45px !important;
+  overflow: visible !important;
+  z-index: -1 !important;
+}
+
+/* Hide Google's injected banner and artifacts */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.goog-te-gadget-icon,
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Prevent Google from pushing the page down */
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+/* =====================================================
+   TABLET
+   ===================================================== */
+
+@media (max-width: 1000px) {
+  .translate-trigger {
+    gap: 5px;
+    min-height: 34px;
+    padding: 5px;
+  }
+
+  .google-translate-mark {
+    width: 21px;
+    height: 21px;
+  }
+
+  .translate-selected-name {
+    font-size: 12px;
+  }
+
+  .translate-chevron {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 760px) {
+  .nav-wrap {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .translate-fixed {
+    order: 3;
+    margin-left: 0;
+  }
+
+  .translate-trigger {
+    min-height: 32px;
+    padding: 4px;
+    gap: 5px;
+    font-size: 12px;
+  }
+
+  .google-translate-mark {
+    width: 20px;
+    height: 20px;
+  }
+
+  .translate-selected-flag {
+    font-size: 16px;
+  }
+
+  .translate-selected-name {
+    font-size: 12px;
+  }
+
+  .translate-chevron {
+    width: 13px;
+    height: 13px;
+  }
+
+  .translate-menu {
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(260px, calc(100vw - 30px));
+    max-height: 60vh;
+  }
+}
+
+/* =====================================================
+   ARABIC RTL SUPPORT
+   ===================================================== */
+
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] .nav-wrap,
+html[dir="rtl"] .nav,
+html[dir="rtl"] .hero-actions,
+html[dir="rtl"] .hero-trust,
+html[dir="rtl"] .cta-inner,
+html[dir="rtl"] .form-heading,
+html[dir="rtl"] .consult-points > div {
+  direction: rtl;
+}
+
+html[dir="rtl"] .hero-shade {
+  background: linear-gradient(
+    270deg,
+    rgba(5, 28, 47, 0.87) 0%,
+    rgba(6, 35, 51, 0.67) 42%,
+    rgba(5, 29, 44, 0.1) 100%
+  );
+}
+
+html[dir="rtl"] .hero-note {
+  right: auto;
+  left: max(22px, calc((100% - 1180px) / 2));
+}
+
+html[dir="rtl"] .notice {
+  border-left: 0;
+  border-right: 3px solid var(--gold);
+}
+
+html[dir="rtl"] .service-card,
+html[dir="rtl"] .hospital-body,
+html[dir="rtl"] .doctor-card,
+html[dir="rtl"] .field {
+  text-align: right;
+}
+
+html[dir="rtl"] .translate-fixed {
+  direction: ltr;
+  text-align: left;
+}
+
+html[dir="rtl"] .footer-bottom {
+  direction: rtl;
+}
+
+@media (max-width: 760px) {
+  html[dir="rtl"] .hero-note {
+    left: 15px;
+    right: auto;
+  }
+}
