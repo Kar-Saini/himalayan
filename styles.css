@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
   --navy: #0b2540;
@@ -1282,6 +1282,7 @@ img {
 
 /* =====================================================
    CUSTOM LANGUAGE SELECTOR
+   Matched to the supplied summary element measurements
    ===================================================== */
 
 .nav-wrap {
@@ -1299,136 +1300,208 @@ img {
   order: 3;
   flex: none;
   margin-left: 0;
-  font-family: "DM Sans", Arial, sans-serif;
-  color: var(--blue);
+  font-family: Inter, Arial, sans-serif;
 }
 
-.translate-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 36px;
-  padding: 6px 8px;
-  border: 1px solid transparent;
-  border-radius: 7px;
-  background: transparent;
-  box-shadow: none;
-  color: var(--blue);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-}
-
-.translate-trigger:hover,
-.translate-trigger:focus-visible {
-  background: #f3f8fb;
-  border-color: #e1edf2;
-  outline: none;
-}
-
-.google-translate-mark {
-  width: 23px;
-  height: 23px;
-  flex: none;
-}
-
-.translate-selected-flag {
-  font-size: 17px;
+.ht-language-switcher {
+  position: relative;
+  display: inline-block;
+  font-family: Inter, Arial, sans-serif;
   line-height: 1;
 }
 
-.translate-selected-name {
-  color: var(--blue);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.translate-chevron {
-  width: 15px;
-  height: 15px;
-  flex: none;
-  margin-left: 1px;
-  color: var(--blue);
-}
-
-.translate-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  bottom: auto;
-  z-index: 10001;
-  width: 260px;
-  max-height: min(440px, 65vh);
-  overflow-y: auto;
-  padding: 12px;
-  background: #fff;
-  border: 1px solid #dce6ea;
-  border-radius: 12px;
-  box-shadow: 0 18px 48px #102f4430;
-}
-
-.translate-menu[hidden] {
-  display: none !important;
-}
-
-.translate-menu-title {
-  padding: 5px 8px 11px;
-  color: #16364c;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.translate-options {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3px;
-}
-
-.translate-option {
+/* Button: 33.6px tall, 8px radius, 12px Inter, blue text */
+.ht-language-summary {
   display: flex;
   align-items: center;
-  gap: 11px;
-  width: 100%;
-  padding: 10px;
-  border: 0;
+  gap: 6px;
+  width: max-content;
+  height: 33.6px;
+  min-height: 33.6px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 0.8px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background: #fff;
-  color: #284354;
-  text-align: left;
-  font-family: "DM Sans", Arial, sans-serif;
-  font-size: 13px;
+  background-color: rgb(255, 255, 255);
+  color: #005697;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
   cursor: pointer;
+  list-style: none;
+  transition:
+    color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.translate-option:hover,
-.translate-option:focus-visible {
-  background: #edf6f7;
+.ht-language-summary::-webkit-details-marker {
+  display: none;
+}
+
+.ht-language-summary::marker {
+  display: none;
+  content: "";
+}
+
+.ht-language-summary:hover {
+  background-color: #f9fafb;
+}
+
+.ht-language-summary:focus-visible {
+  outline: 2px solid rgba(0, 86, 151, 0.35);
+  outline-offset: 2px;
+}
+
+.ht-language-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: #005697;
+}
+
+.ht-language-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #005697;
+  white-space: nowrap;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.ht-language-current-flag {
+  display: inline-block;
+  flex: none;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.ht-language-current-name {
+  color: #005697;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.ht-language-chevron {
+  display: block;
+  width: 12px;
+  height: 12px;
+  flex: none;
+  color: #005697;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ht-language-switcher[open] .ht-language-chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+.ht-language-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 10001;
+  width: 176px;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 35, 50, 0.13);
+  list-style: none;
+}
+
+.ht-language-list li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ht-language-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: #374151;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ht-language-option:hover,
+.ht-language-option:focus-visible {
+  background: #f9fafb;
   outline: none;
 }
 
-.translate-flag {
-  width: 24px;
+.ht-language-option[aria-current="true"] {
+  color: #365368;
+  font-weight: 600;
+}
+
+.ht-language-option-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.ht-language-option-flag {
+  display: inline-block;
+  width: 16px;
   flex: none;
-  font-size: 18px;
+  font-size: 13px;
+  line-height: 16px;
   text-align: center;
 }
 
-.translate-powered {
-  border-top: 1px solid #e8eef0;
-  margin: 8px 0 0;
-  padding: 10px 8px 2px;
-  color: #82929c;
-  font-size: 10px;
+.ht-language-check {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: #365368;
+}
+
+.ht-language-check[hidden] {
+  display: none !important;
+}
+
+/* Kept available to assistive technology without changing the dropdown */
+.ht-language-status {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 /* Google Translate integration */
-
 .google-translate-hidden {
   position: fixed !important;
   left: -10000px !important;
@@ -1455,35 +1528,13 @@ body {
 }
 
 /* Tablet */
-
 @media (max-width: 1000px) {
   .nav {
     gap: 13px;
   }
-
-  .translate-trigger {
-    gap: 5px;
-    min-height: 34px;
-    padding: 5px;
-  }
-
-  .google-translate-mark {
-    width: 21px;
-    height: 21px;
-  }
-
-  .translate-selected-name {
-    font-size: 12px;
-  }
-
-  .translate-chevron {
-    width: 14px;
-    height: 14px;
-  }
 }
 
-/* Mobile */
-
+/* Mobile placement follows the existing header layout */
 @media (max-width: 760px) {
   .nav-wrap {
     gap: 8px;
@@ -1509,35 +1560,13 @@ body {
     margin-left: 0;
   }
 
-  .translate-trigger {
-    min-height: 32px;
-    padding: 4px;
-    gap: 5px;
-    font-size: 12px;
+  .ht-language-summary {
+    height: 33.6px;
+    min-height: 33.6px;
   }
 
-  .google-translate-mark {
-    width: 20px;
-    height: 20px;
-  }
-
-  .translate-selected-flag {
-    font-size: 16px;
-  }
-
-  .translate-selected-name {
-    font-size: 12px;
-  }
-
-  .translate-chevron {
-    width: 13px;
-    height: 13px;
-  }
-
-  .translate-menu {
-    top: calc(100% + 8px);
-    right: 0;
-    width: min(260px, calc(100vw - 30px));
+  .ht-language-list {
+    width: 176px;
     max-height: 60vh;
   }
 
@@ -1546,8 +1575,14 @@ body {
   }
 }
 
-/* Arabic RTL support */
+/* The supplied reference hides the language name below the small breakpoint */
+@media (max-width: 639px) {
+  .ht-language-current {
+    display: none;
+  }
+}
 
+/* Arabic RTL support */
 html[dir="rtl"] {
   direction: rtl;
 }

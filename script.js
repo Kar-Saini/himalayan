@@ -1,17 +1,19 @@
 (() => {
   "use strict";
 
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [
+    ...root.querySelectorAll(selector),
+  ];
 
   // =====================================================
-  // GOOGLE TRANSLATE BANNER CLEANUP
+  // GOOGLE TRANSLATE CLEANUP
   // =====================================================
 
-  const googleTranslateCleanupStyles = document.createElement("style");
-  googleTranslateCleanupStyles.id = "google-translate-cleanup-styles";
+  const cleanupStyles = document.createElement("style");
+  cleanupStyles.id = "google-translate-cleanup-styles";
 
-  googleTranslateCleanupStyles.textContent = `
+  cleanupStyles.textContent = `
     .goog-te-banner-frame,
     .goog-te-banner-frame.skiptranslate,
     iframe.goog-te-banner-frame {
@@ -48,36 +50,31 @@
       overflow: visible !important;
       z-index: -1 !important;
     }
-
-    .translate-fixed {
-      position: relative;
-      z-index: 9999 !important;
-    }
   `;
 
-  document.head.appendChild(googleTranslateCleanupStyles);
+  document.head.appendChild(cleanupStyles);
 
   // =====================================================
   // FOOTER YEAR
   // =====================================================
 
-  $$("[data-year]").forEach(
-    (el) => (el.textContent = new Date().getFullYear()),
-  );
+  $$("[data-year]").forEach((element) => {
+    element.textContent = new Date().getFullYear();
+  });
 
   // =====================================================
   // MOBILE NAVIGATION
   // =====================================================
 
-  const menu = $(".menu-toggle");
+  const menuToggle = $(".menu-toggle");
   const nav = $(".nav");
 
-  if (menu && nav) {
-    menu.addEventListener("click", () => {
-      const open = nav.classList.toggle("open");
+  if (menuToggle && nav) {
+    menuToggle.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("open");
 
-      menu.setAttribute("aria-expanded", String(open));
-      menu.textContent = open ? "×" : "☰";
+      menuToggle.setAttribute("aria-expanded", String(isOpen));
+      menuToggle.textContent = isOpen ? "×" : "☰";
     });
   }
 
@@ -86,38 +83,34 @@
   // =====================================================
 
   const languageOptions = [
-    // English
     { code: "en", flag: "🇬🇧", name: "English" },
-
-    // Indian languages
+    { code: "fr", flag: "🇫🇷", name: "Français" },
     { code: "hi", flag: "🇮🇳", name: "हिन्दी" },
-    { code: "mr", flag: "🇮🇳", name: "मराठी" },
-    { code: "bn", flag: "🇮🇳", name: "বাংলা" },
-    { code: "ta", flag: "🇮🇳", name: "தமிழ்" },
-    { code: "te", flag: "🇮🇳", name: "తెలుగు" },
-    { code: "kn", flag: "🇮🇳", name: "ಕನ್ನಡ" },
-    { code: "ml", flag: "🇮🇳", name: "മലയാളം" },
-    { code: "pa", flag: "🇮🇳", name: "ਪੰਜਾਬੀ" },
-    { code: "or", flag: "🇮🇳", name: "ଓଡ଼ିଆ" },
-    { code: "as", flag: "🇮🇳", name: "অসমীয়া" },
-    { code: "ne", flag: "🇮🇳", name: "नेपाली" },
-
-    // International languages
     { code: "ar", flag: "🇸🇦", name: "العربية" },
     { code: "ru", flag: "🇷🇺", name: "Русский" },
-    { code: "fr", flag: "🇫🇷", name: "Français" },
     { code: "es", flag: "🇪🇸", name: "Español" },
+    { code: "bn", flag: "🇧🇩", name: "বাংলা" },
     { code: "pt", flag: "🇧🇷", name: "Português" },
-    { code: "de", flag: "🇩🇪", name: "Deutsch" },
-    { code: "zh-CN", flag: "🇨🇳", name: "中文" },
-    { code: "tr", flag: "🇹🇷", name: "Türkçe" },
-    { code: "id", flag: "🇮🇩", name: "Bahasa Indonesia" },
+    { code: "bg", flag: "🇧🇬", name: "Български" },
+    { code: "ro", flag: "🇷🇴", name: "Română" },
+    { code: "sq", flag: "🇦🇱", name: "Shqip" },
+    { code: "uz", flag: "🇺🇿", name: "Oʻzbekcha" },
   ];
 
-  const savedLanguage = localStorage.getItem("ht-language") || "en";
+  const storedLanguage = localStorage.getItem("ht-language") || "en";
+
+  const savedLanguage = languageOptions.some(
+    (language) => language.code === storedLanguage,
+  )
+    ? storedLanguage
+    : "en";
+
+  if (savedLanguage !== storedLanguage) {
+    localStorage.setItem("ht-language", "en");
+  }
 
   // =====================================================
-  // LANGUAGE DIRECTION (ARABIC RTL)
+  // LANGUAGE DIRECTION
   // =====================================================
 
   function applyLanguageDirection(code) {
@@ -208,8 +201,6 @@
       "expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
 
     // Clear existing translation cookies.
-    // This is essential when switching back to English.
-
     document.cookie = `googtrans=; ${expired}`;
 
     if (
@@ -232,9 +223,8 @@
       }
     }
 
-    // English is the original page language.
-    // Do not create a /en/en translation cookie.
-
+    // English is the original language.
+    // No /en/en cookie is required.
     if (code === "en") {
       return;
     }
@@ -254,10 +244,10 @@
 
   // =====================================================
   // CUSTOM LANGUAGE SELECTOR
+  // Compact details/summary control
   // =====================================================
 
   const translateUI = document.createElement("div");
-
   translateUI.className = "translate-fixed";
 
   translateUI.innerHTML = `
@@ -266,108 +256,85 @@
       class="google-translate-hidden"
     ></div>
 
-    <button
-      class="translate-trigger"
-      type="button"
-      aria-expanded="false"
-      aria-controls="translateMenu"
-      aria-label="Translate website"
-    >
-      <svg
-        class="google-translate-mark"
-        viewBox="0 0 72 72"
-        aria-hidden="true"
+    <details class="ht-language-switcher">
+      <summary
+        aria-label="Choose language"
+        class="ht-language-summary"
       >
-        <rect
-          x="5"
-          y="5"
-          width="38"
-          height="49"
-          rx="4"
-          fill="#07579b"
-        />
+        <svg
+          class="ht-language-icon"
+          viewBox="0 -960 960 960"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="m480-80-40-120H160q-33 0-56.5-23.5T80-280v-520q0-33 23.5-56.5T160-880h240l35 120h365q35 0 57.5 22.5T880-680v520q0 33-22.5 56.5T800-80H480ZM286-376q69 0 113.5-44.5T444-536q0-8-.5-14.5T441-564H283v62h89q-8 28-30.5 43.5T287-443q-39 0-67-28t-28-69q0-41 28-69t67-28q18 0 34 6.5t29 19.5l49-47q-21-22-50.5-34T286-704q-67 0-114.5 47.5T124-540q0 69 47.5 116.5T286-376Zm268 20 22-21q-14-17-25.5-33T528-444l26 88Zm50-51q28-33 42.5-63t19.5-47H507l12 42h40q8 15 19 32.5t26 35.5Zm-84 287h280q18 0 29-11.5t11-28.5v-520q0-18-11-29t-29-11H447l47 162h79v-42h41v42h146v41h-51q-10 38-30 74t-47 67l109 107-29 29-108-108-36 37 32 111-80 80Z"></path>
+        </svg>
 
-        <path
-          d="M13 24c0-8 5-13 13-13 5 0 9 2 12 6l-6 5c-2-3-4-4-7-4-4 0-7 3-7 7s3 7 7 7c3 0 5-1 6-3h-7v-6h15v4c0 9-6 15-14 15-7 0-12-5-12-13z"
-          fill="#fff"
-        />
+        <span
+          class="ht-language-current notranslate"
+          translate="no"
+        >
+          <span class="ht-language-current-flag" aria-hidden="true">🇬🇧</span>
+          <span class="ht-language-current-name">English</span>
+        </span>
 
-        <rect
-          x="34"
-          y="18"
-          width="31"
-          height="46"
-          rx="4"
-          fill="#fff"
-          stroke="#07579b"
-          stroke-width="4"
-        />
+        <svg
+          class="ht-language-chevron"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+      </summary>
 
-        <path
-          d="M38 29h23M49 24v7M41 35c3 8 8 13 16 17M56 35c-3 7-7 12-12 15"
-          fill="none"
-          stroke="#07579b"
-          stroke-width="3"
-          stroke-linecap="round"
-        />
-
-        <path
-          d="M43 48l8-11 8 11"
-          fill="none"
-          stroke="#07579b"
-          stroke-width="2.5"
-        />
-      </svg>
-
-      <span class="translate-selected-flag">🇬🇧</span>
-
-      <span class="translate-selected-name">English</span>
-
-      <svg
-        class="translate-chevron"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          d="m5 9 7 7 7-7"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
-
-    <div class="translate-menu" id="translateMenu" hidden>
-      <div class="translate-menu-title">
-        Choose language
-      </div>
-
-      <div class="translate-options">
+      <ul class="ht-language-list">
         ${languageOptions
           .map(
             (language) => `
-              <button
-                type="button"
-                class="translate-option"
-                data-lang="${language.code}"
-              >
-                <span class="translate-flag">
-                  ${language.flag}
-                </span>
+              <li>
+                <button
+                  type="button"
+                  class="ht-language-option"
+                  data-lang="${language.code}"
+                  aria-current="${language.code === savedLanguage ? "true" : "false"}"
+                >
+                  <span
+                    class="ht-language-option-content notranslate"
+                    translate="no"
+                  >
+                    <span class="ht-language-option-flag" aria-hidden="true">${language.flag}</span>
+                    <span>${language.name}</span>
+                  </span>
 
-                <span>${language.name}</span>
-              </button>
+                  <svg
+                    class="ht-language-check"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    ${language.code === savedLanguage ? "" : "hidden"}
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0l-3.5-3.5a1 1 0 111.4-1.4l2.8 2.79 6.8-6.79a1 1 0 011.4 0z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </li>
             `,
           )
           .join("")}
-      </div>
+      </ul>
+    </details>
 
-      <p class="translate-powered">
-        Powered by Google Translate
-      </p>
-    </div>
+    <span class="ht-language-status" aria-live="polite">
+      Powered by Google Translate
+    </span>
   `;
 
   const headerWrap = $(".nav-wrap");
@@ -378,12 +345,12 @@
     document.body.appendChild(translateUI);
   }
 
-  const translateTrigger = $(".translate-trigger", translateUI);
-  const translateMenu = $(".translate-menu", translateUI);
-  const translateStatus = $(".translate-powered", translateUI);
+  const languageDetails = $(".ht-language-switcher", translateUI);
+  const languageButtons = $$("[data-lang]", translateUI);
+  const languageStatus = $(".ht-language-status", translateUI);
 
   // =====================================================
-  // UPDATE LANGUAGE BUTTON
+  // UPDATE SELECTED LANGUAGE
   // =====================================================
 
   function updateLanguageButton(code) {
@@ -391,43 +358,46 @@
       languageOptions.find((item) => item.code === code) ||
       languageOptions.find((item) => item.code === "en");
 
-    $(".translate-selected-flag", translateUI).textContent = language.flag;
+    $(".ht-language-current-flag", translateUI).textContent = language.flag;
 
-    $(".translate-selected-name", translateUI).textContent = language.name;
+    $(".ht-language-current-name", translateUI).textContent = language.name;
 
-    translateTrigger.setAttribute(
+    languageButtons.forEach((button) => {
+      const isSelected = button.dataset.lang === language.code;
+
+      button.setAttribute("aria-current", String(isSelected));
+
+      const check = $(".ht-language-check", button);
+
+      if (check) {
+        check.hidden = !isSelected;
+      }
+    });
+
+    $(".ht-language-summary", translateUI).setAttribute(
       "aria-label",
-      "Current language: " + language.name,
+      `Choose language. Current language: ${language.name}`,
     );
   }
 
   updateLanguageButton(savedLanguage);
 
   // =====================================================
-  // CLOSE LANGUAGE MENU
+  // CLOSE DROPDOWN WHEN CLICKING OUTSIDE
   // =====================================================
-
-  function closeLanguageMenu() {
-    translateMenu.hidden = true;
-
-    translateTrigger.setAttribute("aria-expanded", "false");
-  }
-
-  // =====================================================
-  // TOGGLE LANGUAGE MENU
-  // =====================================================
-
-  translateTrigger.addEventListener("click", () => {
-    const open = translateMenu.hidden;
-
-    translateMenu.hidden = !open;
-
-    translateTrigger.setAttribute("aria-expanded", String(open));
-  });
 
   document.addEventListener("click", (event) => {
     if (!translateUI.contains(event.target)) {
-      closeLanguageMenu();
+      languageDetails.open = false;
+    }
+  });
+
+  // Escape key closes the dropdown.
+  languageDetails.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      languageDetails.open = false;
+
+      $(".ht-language-summary", translateUI).focus();
     }
   });
 
@@ -442,29 +412,24 @@
 
     if (!validLanguage) return;
 
-    // Save selected language across pages.
     localStorage.setItem("ht-language", code);
 
-    // Update selector immediately.
     updateLanguageButton(code);
 
-    // Apply text direction.
     applyLanguageDirection(code);
 
-    // Close dropdown.
-    closeLanguageMenu();
+    languageDetails.open = false;
 
-    // Set or clear Google Translate cookie.
     setGoogleTranslateCookie(code);
 
-    translateStatus.textContent =
+    languageStatus.textContent =
       code === "en" ? "Restoring English..." : "Translating website...";
 
     // Reload so Google Translate reads the updated cookie.
     location.reload();
   }
 
-  $$("[data-lang]", translateUI).forEach((button) => {
+  languageButtons.forEach((button) => {
     button.addEventListener("click", () => {
       selectLanguage(button.dataset.lang);
     });
@@ -480,7 +445,7 @@
       !google.translate ||
       !google.translate.TranslateElement
     ) {
-      translateStatus.textContent = "Google Translate could not initialize.";
+      languageStatus.textContent = "Google Translate could not initialize.";
 
       return;
     }
@@ -490,8 +455,7 @@
         {
           pageLanguage: "en",
 
-          includedLanguages:
-            "en,hi,mr,bn,ta,te,kn,ml,gu,pa,or,as,ne,ar,ru,fr,es,pt,de,zh-CN,tr,id",
+          includedLanguages: "en,fr,hi,ar,ru,es,bn,pt,bg,ro,sq,uz",
 
           autoDisplay: false,
 
@@ -500,11 +464,11 @@
         "google_translate_element",
       );
 
-      translateStatus.textContent = "Powered by Google Translate";
+      languageStatus.textContent = "Powered by Google Translate";
     } catch (error) {
       console.error("Google Translate initialization error:", error);
 
-      translateStatus.textContent = "Google Translate initialization failed.";
+      languageStatus.textContent = "Google Translate initialization failed.";
     }
   };
 
@@ -523,7 +487,7 @@
     googleTranslateScript.async = true;
 
     googleTranslateScript.onerror = () => {
-      translateStatus.textContent =
+      languageStatus.textContent =
         "Google Translate could not load. Check your connection.";
     };
 
@@ -574,7 +538,6 @@
 
     const filterDoctors = () => {
       const query = doctorSearch.value.toLowerCase().trim();
-
       const hospitalValue = doctorHospital.value;
 
       let count = 0;
@@ -682,7 +645,6 @@
           const response = await fetch(form.action, {
             method: "POST",
             body: new FormData(form),
-
             headers: {
               Accept: "application/json",
             },
