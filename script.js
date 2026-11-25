@@ -5,6 +5,59 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
   // =====================================================
+  // GOOGLE TRANSLATE BANNER CLEANUP
+  // =====================================================
+
+  const googleTranslateCleanupStyles = document.createElement("style");
+  googleTranslateCleanupStyles.id = "google-translate-cleanup-styles";
+
+  googleTranslateCleanupStyles.textContent = `
+    .goog-te-banner-frame,
+    .goog-te-banner-frame.skiptranslate,
+    iframe.goog-te-banner-frame {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      max-height: 0 !important;
+      border: 0 !important;
+    }
+
+    body {
+      top: 0 !important;
+      margin-top: 0 !important;
+      position: static !important;
+    }
+
+    html {
+      margin-top: 0 !important;
+    }
+
+    #goog-gt-tt,
+    .goog-tooltip,
+    .goog-tooltip:hover,
+    .goog-text-highlight {
+      display: none !important;
+    }
+
+    .google-translate-hidden {
+      position: fixed !important;
+      left: -10000px !important;
+      top: 0 !important;
+      width: 260px !important;
+      height: 45px !important;
+      overflow: visible !important;
+      z-index: -1 !important;
+    }
+
+    .translate-fixed {
+      position: relative;
+      z-index: 9999 !important;
+    }
+  `;
+
+  document.head.appendChild(googleTranslateCleanupStyles);
+
+  // =====================================================
   // FOOTER YEAR
   // =====================================================
 
@@ -22,6 +75,7 @@
   if (menu && nav) {
     menu.addEventListener("click", () => {
       const open = nav.classList.toggle("open");
+
       menu.setAttribute("aria-expanded", String(open));
       menu.textContent = open ? "×" : "☰";
     });
@@ -32,9 +86,10 @@
   // =====================================================
 
   const languageOptions = [
-    // Indian languages
+    // English
     { code: "en", flag: "🇬🇧", name: "English" },
 
+    // Indian languages
     { code: "hi", flag: "🇮🇳", name: "हिन्दी" },
     { code: "mr", flag: "🇮🇳", name: "मराठी" },
     { code: "bn", flag: "🇮🇳", name: "বাংলা" },
@@ -42,14 +97,12 @@
     { code: "te", flag: "🇮🇳", name: "తెలుగు" },
     { code: "kn", flag: "🇮🇳", name: "ಕನ್ನಡ" },
     { code: "ml", flag: "🇮🇳", name: "മലയാളം" },
-    { code: "gu", flag: "🇮🇳", name: "ગુજરાતી" },
     { code: "pa", flag: "🇮🇳", name: "ਪੰਜਾਬੀ" },
     { code: "or", flag: "🇮🇳", name: "ଓଡ଼ିଆ" },
     { code: "as", flag: "🇮🇳", name: "অসমীয়া" },
     { code: "ne", flag: "🇮🇳", name: "नेपाली" },
 
     // International languages
-    { code: "en", flag: "🇬🇧", name: "English" },
     { code: "ar", flag: "🇸🇦", name: "العربية" },
     { code: "ru", flag: "🇷🇺", name: "Русский" },
     { code: "fr", flag: "🇫🇷", name: "Français" },
@@ -149,27 +202,53 @@
   // =====================================================
 
   function setGoogleTranslateCookie(code) {
-    const cookieValue = `/en/${code}`;
-
-    document.cookie =
-      "googtrans=" + cookieValue + "; path=/; max-age=31536000; SameSite=Lax";
-
-    // Also set the cookie for the current hostname.
-    // This helps on some hosting configurations.
     const hostname = location.hostname;
+
+    const expired =
+      "expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+
+    // Clear existing translation cookies.
+    // This is essential when switching back to English.
+
+    document.cookie = `googtrans=; ${expired}`;
 
     if (
       hostname &&
       hostname !== "localhost" &&
-      hostname.includes(".") &&
       !/^\d+\.\d+\.\d+\.\d+$/.test(hostname)
     ) {
-      document.cookie =
-        "googtrans=" +
-        cookieValue +
-        "; path=/; domain=" +
-        hostname +
-        "; max-age=31536000; SameSite=Lax";
+      document.cookie = `googtrans=; domain=${hostname}; ${expired}`;
+
+      document.cookie = `googtrans=; domain=.${hostname}; ${expired}`;
+
+      const parts = hostname.split(".");
+
+      if (parts.length >= 2) {
+        const parentDomain = parts.slice(-2).join(".");
+
+        document.cookie = `googtrans=; domain=${parentDomain}; ${expired}`;
+
+        document.cookie = `googtrans=; domain=.${parentDomain}; ${expired}`;
+      }
+    }
+
+    // English is the original page language.
+    // Do not create a /en/en translation cookie.
+
+    if (code === "en") {
+      return;
+    }
+
+    const cookieValue = `/en/${code}`;
+
+    document.cookie = `googtrans=${cookieValue}; path=/; max-age=31536000; SameSite=Lax`;
+
+    if (
+      hostname &&
+      hostname !== "localhost" &&
+      !/^\d+\.\d+\.\d+\.\d+$/.test(hostname)
+    ) {
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=31536000; SameSite=Lax`;
     }
   }
 
@@ -178,10 +257,14 @@
   // =====================================================
 
   const translateUI = document.createElement("div");
+
   translateUI.className = "translate-fixed";
 
   translateUI.innerHTML = `
-    <div id="google_translate_element" class="google-translate-hidden"></div>
+    <div
+      id="google_translate_element"
+      class="google-translate-hidden"
+    ></div>
 
     <button
       class="translate-trigger"
@@ -190,43 +273,100 @@
       aria-controls="translateMenu"
       aria-label="Translate website"
     >
-      <svg class="google-translate-mark" viewBox="0 0 72 72" aria-hidden="true">
-        <rect x="5" y="5" width="38" height="49" rx="4" fill="#07579b"/>
-        <path d="M13 24c0-8 5-13 13-13 5 0 9 2 12 6l-6 5c-2-3-4-4-7-4-4 0-7 3-7 7s3 7 7 7c3 0 5-1 6-3h-7v-6h15v4c0 9-6 15-14 15-7 0-12-5-12-13z" fill="#fff"/>
-        <rect x="34" y="18" width="31" height="46" rx="4" fill="#fff" stroke="#07579b" stroke-width="4"/>
-        <path d="M38 29h23M49 24v7M41 35c3 8 8 13 16 17M56 35c-3 7-7 12-12 15" fill="none" stroke="#07579b" stroke-width="3" stroke-linecap="round"/>
-        <path d="M43 48l8-11 8 11" fill="none" stroke="#07579b" stroke-width="2.5"/>
+      <svg
+        class="google-translate-mark"
+        viewBox="0 0 72 72"
+        aria-hidden="true"
+      >
+        <rect
+          x="5"
+          y="5"
+          width="38"
+          height="49"
+          rx="4"
+          fill="#07579b"
+        />
+
+        <path
+          d="M13 24c0-8 5-13 13-13 5 0 9 2 12 6l-6 5c-2-3-4-4-7-4-4 0-7 3-7 7s3 7 7 7c3 0 5-1 6-3h-7v-6h15v4c0 9-6 15-14 15-7 0-12-5-12-13z"
+          fill="#fff"
+        />
+
+        <rect
+          x="34"
+          y="18"
+          width="31"
+          height="46"
+          rx="4"
+          fill="#fff"
+          stroke="#07579b"
+          stroke-width="4"
+        />
+
+        <path
+          d="M38 29h23M49 24v7M41 35c3 8 8 13 16 17M56 35c-3 7-7 12-12 15"
+          fill="none"
+          stroke="#07579b"
+          stroke-width="3"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M43 48l8-11 8 11"
+          fill="none"
+          stroke="#07579b"
+          stroke-width="2.5"
+        />
       </svg>
 
       <span class="translate-selected-flag">🇬🇧</span>
+
       <span class="translate-selected-name">English</span>
 
-      <svg class="translate-chevron" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m5 9 7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg
+        class="translate-chevron"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          d="m5 9 7 7 7-7"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
 
     <div class="translate-menu" id="translateMenu" hidden>
-      <div class="translate-menu-title">Choose language</div>
+      <div class="translate-menu-title">
+        Choose language
+      </div>
 
       <div class="translate-options">
         ${languageOptions
           .map(
             (language) => `
-          <button
-            type="button"
-            class="translate-option"
-            data-lang="${language.code}"
-          >
-            <span class="translate-flag">${language.flag}</span>
-            <span>${language.name}</span>
-          </button>
-        `,
+              <button
+                type="button"
+                class="translate-option"
+                data-lang="${language.code}"
+              >
+                <span class="translate-flag">
+                  ${language.flag}
+                </span>
+
+                <span>${language.name}</span>
+              </button>
+            `,
           )
           .join("")}
       </div>
 
-      <p class="translate-powered">Powered by Google Translate</p>
+      <p class="translate-powered">
+        Powered by Google Translate
+      </p>
     </div>
   `;
 
@@ -241,6 +381,10 @@
   const translateTrigger = $(".translate-trigger", translateUI);
   const translateMenu = $(".translate-menu", translateUI);
   const translateStatus = $(".translate-powered", translateUI);
+
+  // =====================================================
+  // UPDATE LANGUAGE BUTTON
+  // =====================================================
 
   function updateLanguageButton(code) {
     const language =
@@ -259,15 +403,25 @@
 
   updateLanguageButton(savedLanguage);
 
+  // =====================================================
+  // CLOSE LANGUAGE MENU
+  // =====================================================
+
   function closeLanguageMenu() {
     translateMenu.hidden = true;
+
     translateTrigger.setAttribute("aria-expanded", "false");
   }
+
+  // =====================================================
+  // TOGGLE LANGUAGE MENU
+  // =====================================================
 
   translateTrigger.addEventListener("click", () => {
     const open = translateMenu.hidden;
 
     translateMenu.hidden = !open;
+
     translateTrigger.setAttribute("aria-expanded", String(open));
   });
 
@@ -288,19 +442,25 @@
 
     if (!validLanguage) return;
 
+    // Save selected language across pages.
     localStorage.setItem("ht-language", code);
 
+    // Update selector immediately.
     updateLanguageButton(code);
+
+    // Apply text direction.
     applyLanguageDirection(code);
+
+    // Close dropdown.
     closeLanguageMenu();
 
-    // Google Translate reads this cookie when the page loads.
+    // Set or clear Google Translate cookie.
     setGoogleTranslateCookie(code);
 
     translateStatus.textContent =
-      code === "en" ? "Switching to English..." : "Translating website...";
+      code === "en" ? "Restoring English..." : "Translating website...";
 
-    // Reload to apply the selected language.
+    // Reload so Google Translate reads the updated cookie.
     location.reload();
   }
 
@@ -321,6 +481,7 @@
       !google.translate.TranslateElement
     ) {
       translateStatus.textContent = "Google Translate could not initialize.";
+
       return;
     }
 
@@ -328,9 +489,12 @@
       new google.translate.TranslateElement(
         {
           pageLanguage: "en",
+
           includedLanguages:
             "en,hi,mr,bn,ta,te,kn,ml,gu,pa,or,as,ne,ar,ru,fr,es,pt,de,zh-CN,tr,id",
+
           autoDisplay: false,
+
           layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
         },
         "google_translate_element",
@@ -344,7 +508,10 @@
     }
   };
 
-  // Load Google Translate only once.
+  // =====================================================
+  // LOAD GOOGLE TRANSLATE SCRIPT
+  // =====================================================
+
   if (!window.googleTranslateScriptLoaded) {
     window.googleTranslateScriptLoaded = true;
 
@@ -407,6 +574,7 @@
 
     const filterDoctors = () => {
       const query = doctorSearch.value.toLowerCase().trim();
+
       const hospitalValue = doctorHospital.value;
 
       let count = 0;
@@ -438,6 +606,7 @@
     };
 
     doctorSearch.addEventListener("input", filterDoctors);
+
     doctorHospital.addEventListener("change", filterDoctors);
   }
 
@@ -446,7 +615,9 @@
   // =====================================================
 
   const params = new URLSearchParams(location.search);
+
   const hospital = params.get("hospital");
+
   const hospitalSelect = $("#hospital");
 
   if (hospital && hospitalSelect) {
@@ -511,6 +682,7 @@
           const response = await fetch(form.action, {
             method: "POST",
             body: new FormData(form),
+
             headers: {
               Accept: "application/json",
             },
